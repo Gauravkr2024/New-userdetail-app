@@ -1,30 +1,46 @@
 const express = require('express');
 const fs = require('fs');
-
 const app = express();
-const PORT = 3000;
+const port = 3000;
 
-// Middleware to parse JSON and URL encoded data
-app.use(express.json());
+// Configure Express to listen on all network interfaces
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server running at http://0.0.0.0:${port}/`);
+});
+
+// Middleware to parse request body
 app.use(express.urlencoded({ extended: true }));
 
-// Route to handle form submission
-app.post('/submit', (req, res) => {
+// Define route to display form
+app.get('/', (req, res) => {
+  res.send(`
+    <form action="/" method="post">
+      <label for="name">Name:</label><br>
+      <input type="text" id="name" name="name"><br>
+      <label for="email">Email:</label><br>
+      <input type="text" id="email" name="email"><br>
+      <label for="phone">Phone:</label><br>
+      <input type="text" id="phone" name="phone"><br>
+      <label for="gender">Gender:</label><br>
+      <input type="text" id="gender" name="gender"><br><br>
+      <button type="submit">Submit</button>
+    </form>
+  `);
+});
+
+// Define route to handle form submission
+app.post('/', (req, res) => {
   const { name, email, phone, gender } = req.body;
   const userDetails = `Name: ${name}, Email: ${email}, Phone: ${phone}, Gender: ${gender}\n`;
-
+  
   // Append user details to a file
-  fs.appendFile('user_details.txt', userDetails, (err) => {
+  fs.appendFile('userDetails.txt', userDetails, (err) => {
     if (err) {
-      console.error('Error saving user details:', err);
+      console.error('Error writing to file:', err);
       res.status(500).send('Error saving user details');
     } else {
       console.log('User details saved successfully');
-      res.status(200).send('User details saved successfully');
+      res.send('User details saved successfully');
     }
   });
-});
-
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
 });
